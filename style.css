@@ -1,3 +1,5 @@
+/* general settings*/
+
 *,
 *::before,
 *::after {
@@ -10,27 +12,18 @@ html {
 }
 
 body {
-  margin: 0;
+  margin: 20px;
   height: 100%;
 }
 
-header {
-  padding: 1rem;
+.selectionUnit {
+  margin-bottom: 10px;
 }
 
-h1 {
-  margin: 0;
+#deleteButton {
+  margin-bottom: 10px;
 }
-
-main {
-  padding: 1rem;
-}
-
-ul {
-  margin: 0;
-  padding-left: 1rem;
-}
-
-li + li {
-  margin-top: 0.5rem;
+#list {
+  border: 2px solid red;
+  width: 200px;
 }
