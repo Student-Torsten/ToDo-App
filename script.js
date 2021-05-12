@@ -1,39 +1,125 @@
 //buttons & EventListener
 const saveATodoButton = document.querySelector("#saveATodoButton");
+const inputField = document.querySelector("#inputBox");
+
+saveATodoButton.addEventListener("click", newTodosInList);
+
+function newTodoOnEnter(event) {
+  if (event.keyCode === 13) {
+    newTodosInList();
+  }
+}
+inputField.addEventListener("keyup", newTodoOnEnter);
+
+// radio section start
+const showOnlyOpenTodosButton = document.querySelector(
+  "#showOnlyOpenTodosButton"
+);
+showOnlyOpenTodosButton.addEventListener("click", () => {
+  displayAllTodos();
+  hideDoneTodos();
+});
+
+const showOnlyDoneTodosButton = document.querySelector(
+  "#showOnlyDoneTodosButton"
+);
+showOnlyDoneTodosButton.addEventListener("click", () => {
+  displayAllTodos();
+  hideOpenTodos();
+});
+
+const showAllTodosButton = document.querySelector("#showAllTodosButton");
+showAllTodosButton.addEventListener("click", displayAllTodos);
+//radio section end
+
+//remove done todos section start
 const removeDoneTodosButton = document.querySelector("#removeDoneTodosButton");
-saveATodoButton.addEventListener("click", newTodosInAnArray);
-//removeDoneTodosButton.addEventListener("click", deleteAllDoneTodos);
+removeDoneTodosButton.addEventListener("click", deleteAllDoneTodos);
+//remove done todos section end
+
+const list = document.querySelector("#list");
 
 //global variables and arry
 const storedEntrys = [];
-/**
- * read the inputbox and write it in an array
- */
-function newTodosInAnArray() {
-  //variables
-  let newEntry = document.querySelector("#inputBox").value;
 
-  let listObject = {};
-  listObject = {
-    text: newEntry,
-    status: "",
-  };
-  storedEntrys.push(listObject);
-  document.querySelector("#inputBox").value = "";
-  writeListFromArray();
+class Todo {
+  // Wird aufgerufen
+  // wenn ein neues Todo Object erstellt wird
+  constructor(text, status) {
+    this.text = text;
+    this.status = status;
+  }
 }
 
-/* ausgelagerte Zeilen
+/**
+ * read the inputbox and write it in the list
+ */
+function newTodosInList() {
+  //variables
+  const li = document.createElement("li");
+  let newEntry = document.querySelector("#inputBox").value;
+  const newTodoObject = new Todo(newEntry, false);
 
-*/
+  li.todo = newTodoObject;
+
+  li.innerText = newEntry;
+  li.setAttribute("data-content", newEntry);
+  const deleteMarkerElem = createDeletemarker();
+  if (newEntry.length > 4) {
+    li.appendChild(deleteMarkerElem);
+    list.append(li);
+    document.querySelector("#inputBox").value = "";
+  } else {
+    alert("this todo is to short");
+  }
+}
+/**
+ * hide done todos (for radio-button)
+ */
+function hideDoneTodos() {
+  const toHideElement = document.querySelector("#list");
+
+  for (let li of toHideElement.children) {
+    const checkbox = li.querySelector('input[type="checkbox"]');
+    const isChecked = checkbox.checked;
+
+    if (isChecked === true) {
+      li.hidden = true;
+    }
+  }
+}
+/**
+ * hide open todos (for radio-button)
+ */
+function hideOpenTodos() {
+  const toHideElement = document.querySelector("#list");
+
+  for (let li of toHideElement.children) {
+    const checkbox = li.querySelector('input[type="checkbox"]');
+    const isChecked = checkbox.checked;
+
+    if (isChecked === false) {
+      li.hidden = true;
+    }
+  }
+}
+/**
+ * display all todos (for radio-button)
+ */
+function displayAllTodos() {
+  const toHideElement = document.querySelector("#list");
+
+  for (let li of toHideElement.children) {
+    li.hidden = false;
+  }
+}
 
 /**
- * create a button for don todos
+ * create a button for done todos
  */
 function createDeletemarker() {
   let deleteMarkerElem = document.createElement("input");
 
-  deleteMarkerElem.addEventListener("change", changeFont);
   deleteMarkerElem.type = "checkbox";
   //deleteMarkerElem.style.marginLeft = "15px"; -->> CSS
   deleteMarkerElem.setAttribute("class", "buttonStyle");
@@ -41,56 +127,39 @@ function createDeletemarker() {
   return deleteMarkerElem;
 }
 
-/**
- * save a new todo: add the to the list and store it in an array
- */
-function writeListFromArray() {
-  const list = document.querySelector("#list");
-  const li = document.createElement("li");
+function toggleTodoCheckbox(e) {
+  if (e.target.tagName === "INPUT") {
+    const checkbox = e.target;
+    const todoState = checkbox.checked;
 
-  for (let i = 0; i < storedEntrys.length; i++) {
-    let todoText = storedEntrys[i].text;
-    const deleteMarkerElem = createDeletemarker();
+    const todoLiElement = e.target.parentElement;
+    todoLiElement.setAttribute("checked", todoState);
+    let todoValue = todoLiElement.getAttribute("data-content");
 
-    li.innerText = todoText;
-
-    li.appendChild(deleteMarkerElem);
-    list.append(li);
-    //newEntry = "";
+    if (todoState === true) {
+      todoLiElement.setAttribute("class", "done");
+    } else {
+      todoLiElement.removeAttribute("class", "done");
+    }
   }
 }
 
-/**
- * change typo if todo is done
- */
-function changeFont(event) {
-  //variables
-  const doneCheck = document.querySelector("doneCheck");
-  const LiElement = event.target.parentElement;
-}
+list.addEventListener("change", toggleTodoCheckbox);
 
 /**
  * delete the done todos from list and array
  */
 function deleteAllDoneTodos() {
   //variables
+  const toHideElement = document.querySelector("#list");
+
+  for (let li of toHideElement.children) {
+    const checkbox = li.querySelector('input[type="checkbox"]');
+    const isChecked = checkbox.checked;
+    console.log(isChecked);
+
+    if (isChecked === true) {
+      li.remove();
+    }
+  }
 }
-
-/*
-push to array
-refactor: list generate from array instead with method appendchild
-write as an objekt to array as an own function
-get attribute "checked" and do as second value to the object
-  - get parent element
-  - after click "doneButton" update object in array
-  - regenerate list from array
-
-filter function
-- if questions to filter in own functions (3x)
-- get attribute "checked" from array
-- for each to scan the array
-- call function to write the list from filtered array
-
-
-
-*/

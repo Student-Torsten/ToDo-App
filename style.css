@@ -15,7 +15,9 @@ body {
   margin: 20px;
   height: 100%;
 }
-
+.done {
+  text-decoration-line: line-through;
+}
 .selectionUnit {
   margin-bottom: 10px;
 }
@@ -26,4 +28,5 @@ body {
 #list {
   border: 2px solid red;
   width: 200px;
+  /*text-decoration-line: line-through;*/
 }
