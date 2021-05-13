@@ -12,24 +12,24 @@ function newTodoOnEnter(event) {
 inputField.addEventListener("keyup", newTodoOnEnter);
 
 // radio section start
-const showOnlyOpenTodosButton = document.querySelector(
-  "#showOnlyOpenTodosButton"
+const displayOnlyOpenTodosButton = document.querySelector(
+  "#displayOnlyOpenTodosButton"
 );
-showOnlyOpenTodosButton.addEventListener("click", () => {
+displayOnlyOpenTodosButton.addEventListener("click", () => {
   displayAllTodos();
-  hideDoneTodos();
+  displayOnlyOpenTodos();
 });
 
-const showOnlyDoneTodosButton = document.querySelector(
-  "#showOnlyDoneTodosButton"
+const displayOnlyDoneTodosButton = document.querySelector(
+  "#displayOnlyDoneTodosButton"
 );
-showOnlyDoneTodosButton.addEventListener("click", () => {
+displayOnlyDoneTodosButton.addEventListener("click", () => {
   displayAllTodos();
-  hideOpenTodos();
+  displayOnlyDoneTodos();
 });
 
-const showAllTodosButton = document.querySelector("#showAllTodosButton");
-showAllTodosButton.addEventListener("click", displayAllTodos);
+const displayAllTodosButton = document.querySelector("#displayAllTodosButton");
+displayAllTodosButton.addEventListener("click", displayAllTodos);
 //radio section end
 
 //remove done todos section start
@@ -38,9 +38,6 @@ removeDoneTodosButton.addEventListener("click", deleteAllDoneTodos);
 //remove done todos section end
 
 const list = document.querySelector("#list");
-
-//global variables and arry
-const storedEntrys = [];
 
 class Todo {
   // Wird aufgerufen
@@ -73,10 +70,11 @@ function newTodosInList() {
     alert("this todo is to short");
   }
 }
+
 /**
- * hide done todos (for radio-button)
+ * show only open todos (for radio-button)
  */
-function hideDoneTodos() {
+function displayOnlyOpenTodos() {
   const toHideElement = document.querySelector("#list");
 
   for (let li of toHideElement.children) {
@@ -91,7 +89,7 @@ function hideDoneTodos() {
 /**
  * hide open todos (for radio-button)
  */
-function hideOpenTodos() {
+function displayOnlyDoneTodos() {
   const toHideElement = document.querySelector("#list");
 
   for (let li of toHideElement.children) {
@@ -121,7 +119,6 @@ function createDeletemarker() {
   let deleteMarkerElem = document.createElement("input");
 
   deleteMarkerElem.type = "checkbox";
-  //deleteMarkerElem.style.marginLeft = "15px"; -->> CSS
   deleteMarkerElem.setAttribute("class", "buttonStyle");
 
   return deleteMarkerElem;
@@ -147,19 +144,19 @@ function toggleTodoCheckbox(e) {
 list.addEventListener("change", toggleTodoCheckbox);
 
 /**
- * delete the done todos from list and array
+ * delete the done todos from list
  */
 function deleteAllDoneTodos() {
   //variables
-  const toHideElement = document.querySelector("#list");
+  const toHideElement = document.querySelector("#list").children;
 
-  for (let li of toHideElement.children) {
-    const checkbox = li.querySelector('input[type="checkbox"]');
+  const length = toHideElement.length - 1;
+  for (let i = length; i >= 0; i--) {
+    let liNew = toHideElement[i];
+    let checkbox = liNew.querySelector('input[type="checkbox"]');
     const isChecked = checkbox.checked;
-    console.log(isChecked);
-
     if (isChecked === true) {
-      li.remove();
+      liNew.remove();
     }
   }
 }
