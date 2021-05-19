@@ -1,0 +1,33 @@
+/* general settings*/
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  height: 100%;
+}
+
+body {
+  margin: 20px;
+  height: 100%;
+}
+.done {
+  color: brown;
+  text-decoration-line: line-through;
+}
+.selectionUnit {
+  margin-bottom: 10px;
+}
+
+#deleteButton {
+  margin-bottom: 10px;
+}
+#list {
+  border: 2px solid red;
+  width: 200px;
+  /*text-decoration-line: line-through;*/
+}
