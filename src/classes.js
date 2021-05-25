@@ -1,4 +1,4 @@
-export class listObject {
+export class ListObject {
   constructor(text, status) {
     this.text = text;
 

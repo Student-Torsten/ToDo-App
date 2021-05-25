@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "types": [
+      "cypress" // Add cypress as one of the types. And it should be present in node_modules.
+    ]
+  },
+  "include": ["**/*.*"]
+}

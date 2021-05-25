@@ -1,5 +1,5 @@
 // embed classes.js
-import { listObject } from "./classes.js";
+import { ListObject } from "./classes.js";
 
 //global variables, arry and eventListener
 const saveATodoButton = document.querySelector("#saveATodoButton");
@@ -41,25 +41,61 @@ const removeDoneTodosButton = document.querySelector("#removeDoneTodosButton");
 removeDoneTodosButton.addEventListener("click", deleteAllDoneTodos);
 //remove done todos section end
 
+//initial function
+restoreFromLocal();
+displayChoosedSelection();
+
+/**
+ * show the choosed selection
+ */
+function displayChoosedSelection() {
+  let selected = "";
+  const selectionUnit = document.getElementsByName("selectTodosButton");
+  for (let i = 0; i < selectionUnit.length; i++) {
+    if (selectionUnit[i].checked) {
+      selected = selectionUnit[i].id;
+      if (selected === "displayAllTodosButton") {
+        displayAllTodos();
+      }
+      if (selected === "displayOnlyOpenTodosButton") {
+        displayOnlyOpenTodos();
+      }
+      if (selected === "displayOnlyDoneTodosButton") {
+        displayOnlyDoneTodosTodos();
+      }
+    }
+  }
+}
 /**
  * read the inputbox and write it in an array
  */
 function newTodosInAnArray() {
   //variables
   let newEntry = document.querySelector("#inputBox").value;
-  const newTodoObj = new listObject(newEntry);
+  /*
+if (newEntry.length > 4) {
+    li.appendChild(deleteMarkerElem);
+    list.append(li);
+    document.querySelector("#inputBox").value = "";
+  } else {
+    alert("this todo is to short");
+  }
+*/
+
+  const newTodoObj = new ListObject(newEntry);
   storedEntrys.push(newTodoObj);
   document.querySelector("#inputBox").value = "";
-  writeListFromArray();
+  saveArrayToLocalStorage();
+  displayChoosedSelection();
 }
 
 /**
  * create a checkbox for done todos
  */
-function createDeletemarker() {
+function createDeletemarker(todoStatus) {
   let deleteMarkerElem = document.createElement("input");
-
   deleteMarkerElem.type = "checkbox";
+  deleteMarkerElem.checked = todoStatus;
   deleteMarkerElem.style.marginLeft = "15px";
   deleteMarkerElem.setAttribute("class", "buttonStyle");
 
@@ -68,13 +104,18 @@ function createDeletemarker() {
 /**
  * write list from Array
  */
-function writeListFromArray(listObject) {
-  const li = document.createElement("li");
+function writeListFromArray(currentDisplayArray) {
+  list.innerHTML = "";
+  if (currentDisplayArray.length === undefined) {
+    currentDisplayArray.length = 0;
+  }
+  for (let i = 0; i < currentDisplayArray.length; i++) {
+    const li = document.createElement("li");
 
-  for (let i = 0; i < storedEntrys.length; i++) {
-    let todoText = storedEntrys[i].text;
-    const deleteMarkerElem = createDeletemarker();
-    li.objectContent = storedEntrys[i];
+    let todoText = currentDisplayArray[i].text;
+    let todoStatus = currentDisplayArray[i].status;
+    const deleteMarkerElem = createDeletemarker(todoStatus);
+    li.objectContent = currentDisplayArray[i];
     li.innerText = todoText;
     li.setAttribute("data-content", todoText);
 
@@ -88,10 +129,9 @@ function toggleTodoCheckbox(e) {
     const todoState = checkbox.checked;
 
     const todoLiElement = e.target.parentElement;
-    //let todoValue = todoLiElement.getAttribute("data-content");
     const todoObj = todoLiElement.objectContent;
     todoObj.setDoneState(todoState);
-    console.log(storedEntrys);
+    saveArrayToLocalStorage();
   }
 }
 
@@ -101,41 +141,38 @@ list.addEventListener("change", toggleTodoCheckbox);
  * show only open todos (for radio-button)
  */
 function displayOnlyOpenTodos() {
-  const toHideElement = document.querySelector("#list");
-
-  for (let li of toHideElement.children) {
-    const checkbox = li.querySelector('input[type="checkbox"]');
-    const isChecked = checkbox.checked;
-
-    if (isChecked === true) {
-      li.hidden = true;
+  const currentDisplayArray = [];
+  currentDisplayArray.length = 0;
+  for (let i = 0; i < storedEntrys.length; i++) {
+    if (storedEntrys[i].status === false) {
+      currentDisplayArray.push(storedEntrys[i]);
     }
   }
+
+  writeListFromArray(currentDisplayArray);
 }
 /**
  * hide open todos (for radio-button)
  */
 function displayOnlyDoneTodos() {
-  const toHideElement = document.querySelector("#list");
-
-  for (let li of toHideElement.children) {
-    const checkbox = li.querySelector('input[type="checkbox"]');
-    const isChecked = checkbox.checked;
-
-    if (isChecked === false) {
-      li.hidden = true;
+  const currentDisplayArray = [];
+  currentDisplayArray.length = 0;
+  for (let i = 0; i < storedEntrys.length; i++) {
+    if (storedEntrys[i].status === true) {
+      currentDisplayArray.push(storedEntrys[i]);
     }
   }
+
+  writeListFromArray(currentDisplayArray);
 }
 /**
  * display all todos (for radio-button)
  */
 function displayAllTodos() {
-  const toHideElement = document.querySelector("#list");
+  let currentDisplayArray = [];
+  currentDisplayArray = storedEntrys;
 
-  for (let li of toHideElement.children) {
-    li.hidden = false;
-  }
+  writeListFromArray(currentDisplayArray);
 }
 
 /**
@@ -143,15 +180,38 @@ function displayAllTodos() {
  */
 function deleteAllDoneTodos() {
   //variables
-  const toHideElement = document.querySelector("#list").children;
+  for (let i = storedEntrys.length - 1; i >= 0; i--) {
+    if (storedEntrys[i].status === true) {
+      let todoindex = storedEntrys.indexOf(storedEntrys[i]);
+      storedEntrys.splice(todoindex, 1);
+    }
+  }
+  saveArrayToLocalStorage();
+  writeListFromArray();
+}
 
-  const length = toHideElement.length - 1;
-  for (let i = length; i >= 0; i--) {
-    let liNew = toHideElement[i];
-    let checkbox = liNew.querySelector('input[type="checkbox"]');
-    const isChecked = checkbox.checked;
-    if (isChecked === true) {
-      liNew.remove();
+/**
+ * write the current Array to the local storage
+ */
+function saveArrayToLocalStorage() {
+  //make a string from the Arry and store it in the brwoser local storage
+  localStorage.setItem("arr", JSON.stringify(storedEntrys));
+}
+
+/**
+ * //restore the Array) from the local storage and write the list
+ */
+function restoreFromLocal(listObject) {
+  //variables / get JSON-string and parse it
+  let EntrysFromStorage = JSON.parse(localStorage.getItem("arr"));
+  //check whether the local storage is empty
+  if (EntrysFromStorage !== null) {
+    //only if local storage is not empty, update the Array with the content
+    for (let i = 0; i < EntrysFromStorage.length; i++) {
+      let todoText = EntrysFromStorage[i].text;
+      let todoStatus = EntrysFromStorage[i].status;
+      const restoredTodoObj = new ListObject(todoText, todoStatus);
+      storedEntrys.push(restoredTodoObj);
     }
   }
 }
