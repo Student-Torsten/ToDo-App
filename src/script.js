@@ -23,7 +23,6 @@ displayOnlyOpenTodosButton.addEventListener("click", () => {
   displayAllTodos();
   displayOnlyOpenTodos();
 });
-
 const displayOnlyDoneTodosButton = document.querySelector(
   "#displayOnlyDoneTodosButton"
 );
@@ -31,7 +30,6 @@ displayOnlyDoneTodosButton.addEventListener("click", () => {
   displayAllTodos();
   displayOnlyDoneTodos();
 });
-
 const displayAllTodosButton = document.querySelector("#displayAllTodosButton");
 displayAllTodosButton.addEventListener("click", displayAllTodos);
 //radio section end
@@ -61,32 +59,28 @@ function displayChoosedSelection() {
         displayOnlyOpenTodos();
       }
       if (selected === "displayOnlyDoneTodosButton") {
-        displayOnlyDoneTodosTodos();
+        displayOnlyDoneTodos();
       }
     }
   }
 }
+
 /**
  * read the inputbox and write it in an array
  */
 function newTodosInAnArray() {
   //variables
   let newEntry = document.querySelector("#inputBox").value;
-  /*
-if (newEntry.length > 4) {
-    li.appendChild(deleteMarkerElem);
-    list.append(li);
+
+  if (newEntry.length > 4) {
+    const newTodoObj = new ListObject(newEntry);
+    storedEntrys.push(newTodoObj);
     document.querySelector("#inputBox").value = "";
+    saveArrayToLocalStorage();
+    displayChoosedSelection();
   } else {
     alert("this todo is to short");
   }
-*/
-
-  const newTodoObj = new ListObject(newEntry);
-  storedEntrys.push(newTodoObj);
-  document.querySelector("#inputBox").value = "";
-  saveArrayToLocalStorage();
-  displayChoosedSelection();
 }
 
 /**
@@ -106,9 +100,7 @@ function createDeletemarker(todoStatus) {
  */
 function writeListFromArray(currentDisplayArray) {
   list.innerHTML = "";
-  if (currentDisplayArray.length === undefined) {
-    currentDisplayArray.length = 0;
-  }
+
   for (let i = 0; i < currentDisplayArray.length; i++) {
     const li = document.createElement("li");
 
@@ -123,6 +115,10 @@ function writeListFromArray(currentDisplayArray) {
     list.append(li);
   }
 }
+
+/**
+ * set the value of done-Button
+ */
 function toggleTodoCheckbox(e) {
   if (e.target.tagName === "INPUT") {
     const checkbox = e.target;
@@ -132,9 +128,13 @@ function toggleTodoCheckbox(e) {
     const todoObj = todoLiElement.objectContent;
     todoObj.setDoneState(todoState);
     saveArrayToLocalStorage();
+    if (todoState === true) {
+      todoLiElement.setAttribute("class", "done");
+    } else {
+      todoLiElement.removeAttribute("class", "done");
+    }
   }
 }
-
 list.addEventListener("change", toggleTodoCheckbox);
 
 /**
@@ -148,9 +148,9 @@ function displayOnlyOpenTodos() {
       currentDisplayArray.push(storedEntrys[i]);
     }
   }
-
   writeListFromArray(currentDisplayArray);
 }
+
 /**
  * hide open todos (for radio-button)
  */
@@ -162,9 +162,9 @@ function displayOnlyDoneTodos() {
       currentDisplayArray.push(storedEntrys[i]);
     }
   }
-
   writeListFromArray(currentDisplayArray);
 }
+
 /**
  * display all todos (for radio-button)
  */
@@ -187,7 +187,8 @@ function deleteAllDoneTodos() {
     }
   }
   saveArrayToLocalStorage();
-  writeListFromArray();
+  displayChoosedSelection();
+  //writeListFromArray();
 }
 
 /**

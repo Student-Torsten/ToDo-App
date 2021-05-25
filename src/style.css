@@ -25,9 +25,17 @@ body {
 
 #deleteButton {
   margin-bottom: 10px;
+  margin-bottom: 20px;
 }
 #list {
   border: 2px solid red;
-  width: 200px;
-  /*text-decoration-line: line-through;*/
+  width: 300px;
+}
+#inputBox {
+  display: inline-flex;
+  width: 300px;
+  margin-top: 10px;
+}
+#saveATodoButton {
+  margin-top: 10px;
 }
