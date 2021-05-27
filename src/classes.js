@@ -1,4 +1,4 @@
-export class ListObject {
+export class TodoListObject {
   constructor(text, status) {
     this.text = text;
 

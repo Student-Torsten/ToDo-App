@@ -1,5 +1,5 @@
 // embed classes.js
-import { ListObject } from "./classes.js";
+import { TodoListObject } from "./classes.js";
 
 //global variables, arry and eventListener
 const saveATodoButton = document.querySelector("#saveATodoButton");
@@ -40,6 +40,7 @@ removeDoneTodosButton.addEventListener("click", deleteAllDoneTodos);
 //remove done todos section end
 
 //initial function
+fetchApiData();
 restoreFromLocal();
 displayChoosedSelection();
 
@@ -73,7 +74,7 @@ function newTodosInAnArray() {
   let newEntry = document.querySelector("#inputBox").value;
 
   if (newEntry.length > 4) {
-    const newTodoObj = new ListObject(newEntry);
+    const newTodoObj = new TodoListObject(newEntry);
     storedEntrys.push(newTodoObj);
     document.querySelector("#inputBox").value = "";
     saveArrayToLocalStorage();
@@ -200,19 +201,40 @@ function saveArrayToLocalStorage() {
 }
 
 /**
- * //restore the Array) from the local storage and write the list
+ * //fetch Entrys from the local storage
  */
-function restoreFromLocal(listObject) {
+function restoreFromLocal() {
   //variables / get JSON-string and parse it
   let EntrysFromStorage = JSON.parse(localStorage.getItem("arr"));
+  pushEntrysToTheArray(EntrysFromStorage);
+}
+
+/**
+ * save restored Data from local Storage and from API
+ */
+function pushEntrysToTheArray(EntrysFromStorage) {
   //check whether the local storage is empty
+
   if (EntrysFromStorage !== null) {
     //only if local storage is not empty, update the Array with the content
     for (let i = 0; i < EntrysFromStorage.length; i++) {
       let todoText = EntrysFromStorage[i].text;
       let todoStatus = EntrysFromStorage[i].status;
-      const restoredTodoObj = new ListObject(todoText, todoStatus);
+      const restoredTodoObj = new TodoListObject(todoText, todoStatus);
       storedEntrys.push(restoredTodoObj);
     }
-  }
+  }displayChoosedSelection();
+}
+// import ApiData
+function fetchApiData() {
+  fetch("http://localhost:4730/todos")
+    .then((response) => response.json())
+    //.then((ApiData) => console.log(ApiData))
+    .then(saveApiDatainArray);
+}
+
+function saveApiDatainArray(fetchedData) {
+  console.log(fetchedData);
+  const EntrysFromStorage = fetchedData;
+  pushEntrysToTheArray(EntrysFromStorage);
 }
