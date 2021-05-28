@@ -13,6 +13,8 @@ function newTodoOnEnter(event) {
 }
 
 let storedEntrys = [];
+let storedEntrysIDs = [];
+
 window.storedEntrys = storedEntrys;
 
 // radio section start
@@ -40,8 +42,8 @@ removeDoneTodosButton.addEventListener("click", deleteAllDoneTodos);
 //remove done todos section end
 
 //initial function
-fetchApiData();
-restoreFromLocal();
+getApiData();
+//restoreFromLocal();
 displayChoosedSelection();
 
 /**
@@ -65,6 +67,7 @@ function displayChoosedSelection() {
     }
   }
 }
+window.displayChoosedSelection = displayChoosedSelection;
 
 /**
  * read the inputbox and write it in an array
@@ -74,11 +77,22 @@ function newTodosInAnArray() {
   let newEntry = document.querySelector("#inputBox").value;
 
   if (newEntry.length > 4) {
-    const newTodoObj = new TodoListObject(newEntry);
-    storedEntrys.push(newTodoObj);
+    fetch("http://localhost:4730/todos", {
+      method: "POST",
+      body: JSON.stringify({
+        text: newEntry,
+        status: false,
+      }),
+      headers: {
+        "Content-type": "application/json; charset=UTF-8",
+      },
+    })
+      .then((response) => response.json())
+      .then((newObj) => {
+        storedEntrys.push(newObj);
+      })
+      .then(displayChoosedSelection);
     document.querySelector("#inputBox").value = "";
-    saveArrayToLocalStorage();
-    displayChoosedSelection();
   } else {
     alert("this todo is to short");
   }
@@ -111,7 +125,9 @@ function writeListFromArray(currentDisplayArray) {
     li.objectContent = currentDisplayArray[i];
     li.innerText = todoText;
     li.setAttribute("data-content", todoText);
-
+    if (todoStatus) {
+      li.classList.add("done");
+    }
     li.appendChild(deleteMarkerElem);
     list.append(li);
   }
@@ -128,12 +144,33 @@ function toggleTodoCheckbox(e) {
     const todoLiElement = e.target.parentElement;
     const todoObj = todoLiElement.objectContent;
     todoObj.setDoneState(todoState);
-    saveArrayToLocalStorage();
-    if (todoState === true) {
-      todoLiElement.setAttribute("class", "done");
-    } else {
-      todoLiElement.removeAttribute("class", "done");
-    }
+
+    fetch("http://localhost:4730/todos" + "/" + todoObj.id, {
+      method: "PUT",
+
+      headers: {
+        "Content-type": "application/json; charset=UTF-8",
+      },
+      body: JSON.stringify(todoObj),
+    }).then(
+      (response) => {
+        if (response.ok === true) {
+          if (todoState === true) {
+            todoLiElement.setAttribute("class", "done");
+          } else {
+            todoLiElement.removeAttribute("class", "done");
+          }
+          return response.json();
+        } else {
+          e.target.checked = !todoState;
+          todoObj.done = !todoState;
+        }
+      },
+      () => {
+        e.target.checked = !todoState;
+        todoObj.done = !todoState;
+      }
+    );
   }
 }
 list.addEventListener("change", toggleTodoCheckbox);
@@ -183,58 +220,85 @@ function deleteAllDoneTodos() {
   //variables
   for (let i = storedEntrys.length - 1; i >= 0; i--) {
     if (storedEntrys[i].status === true) {
+      let todoID = storedEntrys[i].id;
+      fetch("http://localhost:4730/todos" + "/" + todoID, {
+        method: "DELETE",
+
+        headers: {
+          "Content-type": "application/json; charset=UTF-8",
+        },
+      }).then((response) => response.json());
       let todoindex = storedEntrys.indexOf(storedEntrys[i]);
       storedEntrys.splice(todoindex, 1);
     }
   }
-  saveArrayToLocalStorage();
   displayChoosedSelection();
-  //writeListFromArray();
-}
-
-/**
- * write the current Array to the local storage
- */
-function saveArrayToLocalStorage() {
-  //make a string from the Arry and store it in the brwoser local storage
-  localStorage.setItem("arr", JSON.stringify(storedEntrys));
-}
-
-/**
- * //fetch Entrys from the local storage
- */
-function restoreFromLocal() {
-  //variables / get JSON-string and parse it
-  let EntrysFromStorage = JSON.parse(localStorage.getItem("arr"));
-  pushEntrysToTheArray(EntrysFromStorage);
 }
 
 /**
  * save restored Data from local Storage and from API
  */
 function pushEntrysToTheArray(EntrysFromStorage) {
-  //check whether the local storage is empty
+  storedEntrys.length = 0;
 
+  //check whether the local storage is empty
   if (EntrysFromStorage !== null) {
     //only if local storage is not empty, update the Array with the content
     for (let i = 0; i < EntrysFromStorage.length; i++) {
       let todoText = EntrysFromStorage[i].text;
       let todoStatus = EntrysFromStorage[i].status;
-      const restoredTodoObj = new TodoListObject(todoText, todoStatus);
+      let todoID = EntrysFromStorage[i].id;
+      const restoredTodoObj = new TodoListObject(todoText, todoStatus, todoID);
       storedEntrys.push(restoredTodoObj);
     }
-  }displayChoosedSelection();
-}
-// import ApiData
-function fetchApiData() {
-  fetch("http://localhost:4730/todos")
-    .then((response) => response.json())
-    //.then((ApiData) => console.log(ApiData))
-    .then(saveApiDatainArray);
+  }
+
+  displayChoosedSelection();
 }
 
+// import ApiData
+function getApiData() {
+  fetch("http://localhost:4730/todos")
+    .then((response) => response.json())
+    .then(saveApiDatainArray);
+}
+window.getApiData = getApiData;
 function saveApiDatainArray(fetchedData) {
-  console.log(fetchedData);
-  const EntrysFromStorage = fetchedData;
+  let EntrysFromStorage = [];
+  EntrysFromStorage = fetchedData;
+  pushEntrysToTheArray(EntrysFromStorage);
+  console.log(EntrysFromStorage);
+}
+
+/**
+ * write the current Array to the local storage
+ */
+/*
+function saveArrayToLocalStorage() {
+  //make a string from the Arry and store it in the brwoser local storage
+  localStorage.setItem("arr", JSON.stringify(storedEntrys));
+}
+*/
+/**
+ * //fetch Entrys from the local storage
+ */
+/*
+function restoreFromLocal() {
+  //variables / get JSON-string and parse it
+  let EntrysFromStorage = JSON.parse(localStorage.getItem("arr"));
   pushEntrysToTheArray(EntrysFromStorage);
 }
+*/
+
+/**
+ * build a array with the indices of storedEntrys
+ */
+/*
+function collectIDsOfStoredEntrys() {
+  storedEntrysIDs.length = 0;
+  for (let i = 0; i < storedEntrys.length; i++) {
+    let todoID = storedEntrys[i].id;
+    storedEntrysIDs.push(todoID);
+  }
+}
+*/
