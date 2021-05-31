@@ -13,9 +13,6 @@ function newTodoOnEnter(event) {
 }
 
 let storedEntrys = [];
-let storedEntrysIDs = [];
-
-window.storedEntrys = storedEntrys;
 
 // radio section start
 const displayOnlyOpenTodosButton = document.querySelector(
@@ -43,7 +40,6 @@ removeDoneTodosButton.addEventListener("click", deleteAllDoneTodos);
 
 //initial function
 getApiData();
-//restoreFromLocal();
 displayChoosedSelection();
 
 /**
@@ -67,7 +63,6 @@ function displayChoosedSelection() {
     }
   }
 }
-window.displayChoosedSelection = displayChoosedSelection;
 
 /**
  * read the inputbox and write it in an array
@@ -236,14 +231,14 @@ function deleteAllDoneTodos() {
 }
 
 /**
- * save restored Data from local Storage and from API
+ * save restored Data from API
  */
 function pushEntrysToTheArray(EntrysFromStorage) {
   storedEntrys.length = 0;
 
-  //check whether the local storage is empty
+  //check whether the local storage is empty (storage means the API)
   if (EntrysFromStorage !== null) {
-    //only if local storage is not empty, update the Array with the content
+    //only if storage is not empty, update the Array with the content
     for (let i = 0; i < EntrysFromStorage.length; i++) {
       let todoText = EntrysFromStorage[i].text;
       let todoStatus = EntrysFromStorage[i].status;
@@ -252,7 +247,6 @@ function pushEntrysToTheArray(EntrysFromStorage) {
       storedEntrys.push(restoredTodoObj);
     }
   }
-
   displayChoosedSelection();
 }
 
@@ -262,43 +256,10 @@ function getApiData() {
     .then((response) => response.json())
     .then(saveApiDatainArray);
 }
-window.getApiData = getApiData;
+
+//save the got Data in the array
 function saveApiDatainArray(fetchedData) {
   let EntrysFromStorage = [];
   EntrysFromStorage = fetchedData;
   pushEntrysToTheArray(EntrysFromStorage);
-  console.log(EntrysFromStorage);
 }
-
-/**
- * write the current Array to the local storage
- */
-/*
-function saveArrayToLocalStorage() {
-  //make a string from the Arry and store it in the brwoser local storage
-  localStorage.setItem("arr", JSON.stringify(storedEntrys));
-}
-*/
-/**
- * //fetch Entrys from the local storage
- */
-/*
-function restoreFromLocal() {
-  //variables / get JSON-string and parse it
-  let EntrysFromStorage = JSON.parse(localStorage.getItem("arr"));
-  pushEntrysToTheArray(EntrysFromStorage);
-}
-*/
-
-/**
- * build a array with the indices of storedEntrys
- */
-/*
-function collectIDsOfStoredEntrys() {
-  storedEntrysIDs.length = 0;
-  for (let i = 0; i < storedEntrys.length; i++) {
-    let todoID = storedEntrys[i].id;
-    storedEntrysIDs.push(todoID);
-  }
-}
-*/
