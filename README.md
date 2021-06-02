@@ -8,8 +8,8 @@ TODO Torsten: Please add some basic instructions how to start the project =)
 
 # Run the project
 
-`npm start`
+`npm run serve`
 
 # Test the project
 
-`npm test`
+`npm e2e`
