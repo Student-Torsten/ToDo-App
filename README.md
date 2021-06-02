@@ -1,15 +1,14 @@
 # ToDo-App
 
-TODO Torsten: Please add some basic instructions how to start the project =)
+# Prepare a local API-Server
+
+fork this repository, read the README and follow the steps there:
+https://github.com/coding-bootcamps-eu/todo-api
 
 # Prepare the project
 
-`npm init`
+run `npm init`
 
 # Run the project
 
-`npm run serve`
-
-# Test the project
-
-`npm e2e`
+open the project in VSCode and open the /src/index.html in LiveServer
